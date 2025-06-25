@@ -14,9 +14,9 @@ df.drop(columns=['GradeClass'], inplace=True)  # Remove unnecessary columns
 X_train, X_test, y_train, y_test = train_test_split(df.drop(columns=[target_column]), df[target_column], test_size=0.2, random_state=42)
 # # Standardize the features
 columns_to_scale = ['Age','StudyTimeWeekly', 'Absences', 'ParentalEducation','Ethnicity','ParentalSupport']
-scaler = StandardScaler()
-X_train[columns_to_scale] = scaler.fit_transform(X_train[columns_to_scale])
-X_test[columns_to_scale] = scaler.transform(X_test[columns_to_scale])
+# scaler = StandardScaler()
+# X_train[columns_to_scale] = scaler.fit_transform(X_train[columns_to_scale])
+# X_test[columns_to_scale] = scaler.transform(X_test[columns_to_scale])
 # Create a KNN regressor
 # # Train the model
 # let's pick the best k value with cross-validation
@@ -45,30 +45,50 @@ from sklearn.model_selection import cross_val_score
 # knn.fit(X_train, y_train)
 
 # Let's use SVR
-from sklearn.svm import SVR
-svr = SVR(kernel='linear')  # Using SVR as a regression model
-# let's pick hyperparameters for SVR with cross-validation
+# from sklearn.svm import SVR
+# svr = SVR(kernel='linear')  # Using SVR as a regression model
+# # let's pick hyperparameters for SVR with cross-validation
 
-c_range = [0.1, 1, 10, 100]
-epsilon_range = [0.01, 0.1, 0.5, 1]
-best_score = float('inf')
-best_params = {}
-for c in c_range:
-    for epsilon in epsilon_range:
-        svr = SVR(kernel='linear', C=c, epsilon=epsilon)
-        scores = cross_val_score(svr, X_train, y_train, cv=5, scoring='neg_mean_absolute_error')
-        mean_score = -scores.mean()  # Convert to positive MAE
-        if mean_score < best_score:
-            best_score = mean_score
-            best_params = {'C': c, 'epsilon': epsilon}
+# c_range = [0.1, 1, 10, 100]
+# epsilon_range = [0.01, 0.1, 0.5, 1]
+# best_score = float('inf')
+# best_params = {}
+# for c in c_range:
+#     for epsilon in epsilon_range:
+#         svr = SVR(kernel='linear', C=c, epsilon=epsilon)
+#         scores = cross_val_score(svr, X_train, y_train, cv=5, scoring='neg_mean_absolute_error')
+#         mean_score = -scores.mean()  # Convert to positive MAE
+#         if mean_score < best_score:
+#             best_score = mean_score
+#             best_params = {'C': c, 'epsilon': epsilon}
 
-print(f"Best parameters found: {best_params} with Mean Absolute Error: {best_score:.2f}")
-svr = SVR(kernel='linear', C=best_params['C'], epsilon=best_params['epsilon'])  # Use the best parameters found
-svr.fit(X_train, y_train)  # Train the model
+# print(f"Best parameters found: {best_params} with Mean Absolute Error: {best_score:.2f}")
+# svr = SVR(kernel='linear', C=best_params['C'], epsilon=best_params['epsilon'])  # Use the best parameters found
+# svr.fit(X_train, y_train)  # Train the model
 
+
+# # Make predictions
+# y_pred = svr.predict(X_test)
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn import tree
+
+# Create a Decision Tree regressor
+dt_regressor = DecisionTreeRegressor(random_state=42, max_depth=2)
+
+dt_regressor.fit(X_train, y_train)  # Train the model
+
+
+# Visualize the decision tree
+import matplotlib.pyplot as plt
+plt.figure(figsize=(20, 10))
+tree.plot_tree(dt_regressor, filled=True, feature_names=X_train.columns, fontsize=10)
+plt.title("Decision Tree for Student Performance Prediction")
+plt.show()
 
 # Make predictions
-y_pred = svr.predict(X_test)
+y_pred = dt_regressor.predict(X_test)
 # # Evaluate the model
+
 mse = mean_absolute_error(y_test, y_pred)
 print(f"Mean Absolute Error: {mse:.2f}")
