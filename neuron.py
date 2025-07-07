@@ -181,7 +181,7 @@
 
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.layers import Input, Dense, Dropout
 from sklearn.datasets import load_diabetes
 
 # load a simple regression dataset
@@ -198,6 +198,8 @@ X, y = data.data, data.target
 model = Sequential()
 model.add(Input(shape=(X.shape[1],)))         # 10 inputs
 model.add(Dense(8, activation='relu'))        # hidden layer
+model.add(Dropout(0.2))                       # dropout layer
+model.add(Dense(4, activation='relu'))        # another hidden layer
 model.add(Dense(1, activation='linear'))      # output layer
 
 # compile & train
